@@ -6,9 +6,20 @@ output: github_document
 ---
 
 ```{r setup, message = FALSE, warning = FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+
 library(tidyverse) 
 library(caret) 
 library(glmnet)
-library(klaR)
+```
+
+# Load and clean dataset
+
+```{r}
+alcohol = read_csv("./Data/alcohol_use.csv") %>%  
+  janitor::clean_names() %>% 
+  select(-x1) %>% 
+  mutate(
+    alc_consumption = as_factor(alc_consumption))
 ```
 
