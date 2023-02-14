@@ -1,0 +1,22 @@
+ID,Fever,Cough,Weighloss,Blue Lips,Unable to Urinate,COD
+1,1,1,1,0,0,TB
+2,1,1,0,1,0,Pneumonia
+3,1,0,0,0,1,Diabetes
+4,0,0,1,0,0,TB
+5,1,1,1,1,0,Pneumonia
+6,0,1,1,0,1,Diabetes
+7,1,1,0,0,0,TB
+8,1,0,0,1,0,Pneumonia
+9,0,1,0,0,1,Diabetes
+10,0,0,0,1,1,TB
+11,1,0,1,0,0,Pneumonia
+12,0,0,1,0,0,Diabetes
+13,1,1,1,0,0,TB
+14,1,0,0,0,0,Pneumonia
+15,0,0,0,1,1,Diabetes
+16,0,0,1,0,0,TB
+17,0,0,0,1,0,Pneumonia
+18,1,0,1,1,0,Diabetes
+19,1,1,0,0,0,TB
+20,1,0,1,0,0,Pneumonia
+,,,,,,
