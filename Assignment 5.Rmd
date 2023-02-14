@@ -1,0 +1,14 @@
+---
+title: "Assignment 5"
+author: "Chee Kay Cheong"
+date: "2023-02-14"
+output: github_document
+---
+
+```{r setup, message = FALSE, warning = FALSE}
+library(tidyverse) 
+library(caret) 
+library(glmnet)
+library(klaR)
+```
+

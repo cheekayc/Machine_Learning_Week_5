@@ -1,17 +1,9 @@
 ---
 title: "Demonstration Class 5: Regularized Regression, K-Nearest Neighbors and Naive Bayes"
-author: "JAS"
-date: ''
-output:
-  html_document: default
-  word_document: default
-editor_options:
-  chunk_output_type: console
+author: "Lectured by JAS"
+date: '2/14/2023'
+output: github_document
 ---
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
 
 # Demonstration of Regularization Methods
 
@@ -29,9 +21,9 @@ Variable names are not originally informative. You can look up all full variable
 ### Load needed libraries
 ```{r}
 library(tidyverse) 
-library(caret)
-library(glmnet)
-library(klaR)
+library(caret) 
+library(glmnet) # Regularized Regression
+library(klaR) # Naive Bayes
 ```
 
 ### Step 1: Read in data, partition, and put features into separate object 
