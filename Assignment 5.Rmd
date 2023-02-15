@@ -23,3 +23,8 @@ alcohol = read_csv("./Data/alcohol_use.csv") %>%
     alc_consumption = as_factor(alc_consumption))
 ```
 
+# Create models
+
+## Elastic Nets
+
+
