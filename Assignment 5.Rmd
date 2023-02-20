@@ -6,25 +6,93 @@ output: github_document
 ---
 
 ```{r setup, message = FALSE, warning = FALSE}
-knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, set.seed(123))
 
 library(tidyverse) 
 library(caret) 
 library(glmnet)
 ```
 
-# Load and clean dataset
+# Load and clean dataset, data partitioning
 
 ```{r}
+# Load and clean dataset
 alcohol = read_csv("./Data/alcohol_use.csv") %>%  
   janitor::clean_names() %>% 
   select(-x1) %>% 
   mutate(
     alc_consumption = as_factor(alc_consumption))
+
+# Check the distribution of the outcome
+alcohol %>% 
+  select(alc_consumption) %>% 
+  group_by(alc_consumption) %>% 
+  count()
+# Quite balance...
+
+# Partition data into 70/30 split
+set.seed(123)
+
+train_index = 
+  alcohol$alc_consumption %>% createDataPartition(p = 0.7, list = F)
+
+train_data = alcohol[train_index, ]
+test_data = alcohol[-train_index, ]
 ```
 
-# Create models
+# Create 3 different models
 
-## Elastic Nets
+### Elastic Net Model
+
+```{r}
+set.seed(123)
+
+# Set validation method and options
+control.settings = trainControl(method = "repeatedcv", number = 10, repeats = 10)
+
+# Fit model
+EN_model = train(alc_consumption ~ ., data = train_data, method = "glmnet", trControl = control.settings, preProc = c("center", "scale"), tuneLength = 10)
+
+# Find best tuned parameters
+EN_model$bestTune
+
+EN_model$results
+# Highest accuracy = 0.8515189, Kappa = 0.6956916, alpha = 0.7, lambda = 0.2578427450
+```
+
+### Traditional Logistic Regression
+
+```{r}
+set.seed(124)
+
+# Set validation method and options
+control.settings = trainControl(method = "repeatedcv", number = 10, repeats = 10)
+
+# Fit model
+logreg = train(alc_consumption ~ ., data = train_data, method = "glmnet", family = 'binomial', trControl = control.settings, preProc = c("center", "scale"), tuneLength = 10) 
+
+# Find best tuned parameters
+logreg$bestTune
+
+logreg$results
+# Highest accuracy = 0.8515188, Kappa = 0.6956381, alpha = 0.7, lambda = 0.2578427450
+```
+
+### LASSO Model
+
+```{r}
+set.seed(125)
+
+lambda = 10^seq(-3, 1, length = 100)
+lambda.grid = expand.grid(alpha = 1, lambda = lambda)
+
+lasso = train(alc_consumption ~ ., data = train_data, method = "glmnet", preProc = c("center", "scale"), trControl = control.settings, tuneGrid = lambda.grid)
+
+# Find best tuned parameters
+lasso$bestTune
+
+lasso$results
+# Highest accuracy = 0.8515234, Kappa = 0.6957193637, alpha = 1, lambda = 0.242012826
+```
 
 
