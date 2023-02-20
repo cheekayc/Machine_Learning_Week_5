@@ -48,7 +48,7 @@ train_data = alcohol[train_index, ]
 test_data = alcohol[-train_index, ]
 ```
 
-# Create 3 different models
+# 1. Create 3 different models
 
 ### Elastic Net Model
 
@@ -412,3 +412,91 @@ lasso$results
 ``` r
 # Highest accuracy = 0.8515234, Kappa = 0.6957193637, alpha = 1, lambda = 0.242012826
 ```
+
+# 2. Decide final model
+
+Based on the performance tests of all three models, I decided to use the
+**LASSO** model because it has the highest accuracy (0.8515234), as well
+as the highest Kappa value (0.6957193637), among all three models. The
+best tune of the LASSO model is lambda equals 0.242012826.
+
+- The **Kappa** value is a metric that compares an *Observed Accuracy*
+  with an *Expected Accuracy* (random chance). The kappa statistic is
+  used not only to evaluate a single classifier, but also to evaluate
+  classifiers amongst themselves. It is a measurement of the accuracy of
+  a model while taking into account chance. The closer the value is to 1
+  the better.
+  - Cited: rbx (<https://stats.stackexchange.com/users/37276/rbx>),
+    Cohen’s kappa in plain English, URL (version: 2017-10-29):
+    <https://stats.stackexchange.com/q/82187>
+
+# 3. Apply final model in the test set
+
+I decided to use Confusion Matrix as my final evaluation metric.
+
+``` r
+# Test model
+test_outcome = predict(lasso, test_data)
+
+# Evaluation metric:
+confusionMatrix(test_outcome, test_data$alc_consumption, positive = "CurrentUse")
+```
+
+    ## Confusion Matrix and Statistics
+    ## 
+    ##                Reference
+    ## Prediction      CurrentUse NotCurrentUse
+    ##   CurrentUse           301            82
+    ##   NotCurrentUse          0           182
+    ##                                           
+    ##                Accuracy : 0.8549          
+    ##                  95% CI : (0.8231, 0.8829)
+    ##     No Information Rate : 0.5327          
+    ##     P-Value [Acc > NIR] : < 2.2e-16       
+    ##                                           
+    ##                   Kappa : 0.7028          
+    ##                                           
+    ##  Mcnemar's Test P-Value : < 2.2e-16       
+    ##                                           
+    ##             Sensitivity : 1.0000          
+    ##             Specificity : 0.6894          
+    ##          Pos Pred Value : 0.7859          
+    ##          Neg Pred Value : 1.0000          
+    ##              Prevalence : 0.5327          
+    ##          Detection Rate : 0.5327          
+    ##    Detection Prevalence : 0.6779          
+    ##       Balanced Accuracy : 0.8447          
+    ##                                           
+    ##        'Positive' Class : CurrentUse      
+    ## 
+
+# Report Analysis and Results
+
+Before conducting any analysis, I cleaned the `alcohol_use` dataset and
+checked the distribution of the outcome (`alc_consumption`). The
+proportion of `*CurrentUse*` is 0.53, while the proportion of
+`*NotCurrentUse*` is 0.47. I think they are pretty balance so I decided
+not to down sample the outcome during `trainControl`. I partitioned the
+dataset into a 70/30 split.
+
+To better predict the current alcohol consumption, I have created and
+compared three different models (Elastic Net, Logistic Regression, and
+LASSO). Among the three models, LASSO gives the highest accuracy
+(0.8515234) and Kappa value (0.6957193637). The best tune lambda of this
+model is 0.242012826.
+
+I then fit the LASSO model to the testing dataset to test its
+performance. It turned out that this model has an accuracy of 85.5%,
+with a sensitivity of 1, a specificity of 0.69, a positive predictive
+value of 0.7859, and a negative predictive value of 1.
+
+# Problem 5
+
+Assuming we have a another 2000 participants who had taken the
+behavioral test but did not answer whether they currently consume
+alcohol or not. We can use this analysis to directly predict the current
+alcohol consumption for this group of people using their test scores. On
+another instance, if we were interested in seeking the association
+between alcohol consumption and liver cancer among this population, this
+analysis can indirectly provide information about the prediction of
+alcohol consumption of each individual in this population.
