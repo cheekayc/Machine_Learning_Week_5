@@ -21,7 +21,8 @@ alcohol = read_csv("./Data/alcohol_use.csv") %>%
   janitor::clean_names() %>% 
   select(-x1) %>% 
   mutate(
-    alc_consumption = as_factor(alc_consumption))
+    alc_consumption = as_factor(alc_consumption),
+    alc_consumption = relevel(alc_consumption, ref = "NotCurrentUse"))
 
 # Check the distribution of the outcome
 alcohol %>% 
@@ -60,8 +61,45 @@ EN_model$results
 # Highest accuracy = 0.8515189, Kappa = 0.6956916, alpha = 0.7, lambda = 0.2578427450
 ```
 
+Professor's solution:
+```{r}
+set.seed(123)
+
+# Create vectors of lambda and alpha
+lambda = 10^seq(-3, 3, length = 100)
+alpha = 0.1*seq(1, 10, length = 10)
+
+# Create Model 1 using `Caret`
+model.1 = train(alc_consumption ~ ., data = train_data, method = "glmnet", trControl = trainControl("cv", number = 10), preProcess = c("center", "scale"), tuneGrid = expand.grid(alpha = alpha, lambda = lambda))
+
+# Output best values of alpha & lambda
+model.1$finalModel$tuneValue
+model.1$bestTune
+
+# Can store it if we want to use in a different implementation
+best.alpha = model.1$bestTune$alpha
+best.lambda = model.1$bestTune$lambda
+
+# To view coefficients, must specify value of lambda
+coef(model.1$finalModel, model.1$bestTune$lambda)
+model.1$results[which.max(model.1$results$Accuracy), ] # find where the maximum accuracy is and print that row out.
+
+# OR
+
+max(model.1$results$Accuracy)
+
+# OR
+
+confusionMatrix(model.1)
+```
+How to interpret ConfusionMatrix?
+53.3% of the data is correctly classified as those who are "CurrentUse" has been predicted as "CurrentUse".
+33 % of the data is correctly classified as those who are "NotCurrentUse" has been predicted as "NotCurrentUse".
+13.8% of the data has been **misclassified** because 13.8% of the "NotCurrentUse" has been predicted as "CurrentUse".
+
 ### Traditional Logistic Regression
 
+**If we still want to use `glmnet` we must set alpha and lambda equal to 0, so that it gives us a traditional logistic regression.**
 ```{r}
 set.seed(124)
 
@@ -78,13 +116,30 @@ logreg$results
 # Highest accuracy = 0.8515188, Kappa = 0.6956381, alpha = 0.7, lambda = 0.2578427450
 ```
 
+Professor's solution:
+```{r}
+set.seed(123)
+
+model.2 = train(alc_consumption ~ ., data = train_data, method = "glm", trControl = trainControl("cv", number = 10), preProcess = c("center", "scale"))
+
+model.2$results
+coef(model.2$finalModel) # Nothing gets shrunk down to 0, but we still get to see variable importance.
+
+confusionMatrix(model.2)
+# Average accuracy = 0.8045
+```
+
+We can see that although we have a lower overall accuracy and there is some misclassification of "CurrentUse", but we are doing much better with the "NotCurrentUse" prediction. 
+**So there is a balance in traditional logistic regression.**
+
+
 ### LASSO Model
 
 ```{r}
 set.seed(125)
 
-lambda = 10^seq(-3, 1, length = 100)
-lambda.grid = expand.grid(alpha = 1, lambda = lambda)
+lambda.2 = 10^seq(-3, 1, length = 100)
+lambda.grid = expand.grid(alpha = 1, lambda = lambda.2)
 
 lasso = train(alc_consumption ~ ., data = train_data, method = "glmnet", preProc = c("center", "scale"), trControl = control.settings, tuneGrid = lambda.grid)
 
@@ -93,6 +148,21 @@ lasso$bestTune
 
 lasso$results
 # Highest accuracy = 0.8515234, Kappa = 0.6957193637, alpha = 1, lambda = 0.242012826
+```
+
+Professor's Solution:
+```{r}
+set.seed(123)
+
+model.3 = train(alc_consumption ~ ., data = train_data, method = "glmnet", trControl = trainControl("cv", number = 10), preProcess = c("center", "scale"), tuneGrid = expand.grid(alpha = 1, lambda = lambda))
+
+# Output best value of alpha & lambda
+model.3$finalModel$tuneValue
+model.3$bestTune
+
+confusionMatrix(model.3)
+
+coef(model.3$finalModel, model.3$bestTune$lambda)
 ```
 
 
